@@ -1,5 +1,5 @@
 import "react-native-gesture-handler";
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import firebase from "firebase/app";
 import { firebaseConfig } from "./firebase";
 
@@ -38,6 +38,21 @@ const RootStack = createStackNavigator<RootStackParamList>();
 if (firebase.apps.length === 0) firebase.initializeApp(firebaseConfig);
 
 export default function App() {
+	const [state, setState] = useState({ loggedIn: false });
+
+	useEffect(() => {
+		const unsubscribe = firebase.auth().onAuthStateChanged((user) => {
+			console.log("Auth State Changed");
+
+			if (user) {
+				setState({ loggedIn: true });
+			} else {
+				setState({ loggedIn: false });
+			}
+		});
+		return unsubscribe;
+		// eslint-disable-next-line
+	}, []);
 	const [fontPoppinsLoaded] = usePoppinsFonts({
 		Poppins_700Bold,
 	});
@@ -55,19 +70,24 @@ export default function App() {
 	return (
 		<NavigationContainer>
 			<RootStack.Navigator initialRouteName="Landing" headerMode="none">
-				<RootStack.Screen name="Landing" component={LandingScreen} />
-				<RootStack.Screen
-					name="EmailPassLogin"
-					component={EmailPasswordLoginScreen}
-					options={{
-						gestureDirection: "horizontal",
-					}}
-				/>
-				<RootStack.Screen
-					name="EmailPassSignup"
-					component={EmailSignupScreen}
-				/>
-				<RootStack.Screen name="HomeScreen" component={HomeScreen} />
+				{state.loggedIn ? (
+					<RootStack.Screen name="HomeScreen" component={HomeScreen} />
+				) : (
+					<>
+						<RootStack.Screen name="Landing" component={LandingScreen} />
+						<RootStack.Screen
+							name="EmailPassLogin"
+							component={EmailPasswordLoginScreen}
+							options={{
+								gestureDirection: "horizontal",
+							}}
+						/>
+						<RootStack.Screen
+							name="EmailPassSignup"
+							component={EmailSignupScreen}
+						/>
+					</>
+				)}
 			</RootStack.Navigator>
 		</NavigationContainer>
 	);

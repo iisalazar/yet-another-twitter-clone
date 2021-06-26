@@ -51,7 +51,6 @@ function EmailPasswordSignupScreen({ navigation }: Props) {
 			.then((userCredential) => {
 				if (userCredential) {
 					console.log(userCredential);
-					navigation.navigate("HomeScreen");
 				}
 			})
 			.catch((err) => {
